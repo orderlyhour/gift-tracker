@@ -1,0 +1,638 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f4d3a">
+<meta name="robots" content="noindex, nofollow">
+<title>Christmas Gift Tracker</title>
+<!--
+  Christmas Gift Tracker v1.0 - designed by OrderlyHour.
+  One file, no internet needed, no account. Your list is saved in this browser on this
+  device (localStorage). Use Settings > Download a backup to keep a copy or move devices.
+-->
+<style>
+:root{
+  --bg:#f7f2e9; --card:#fffdf8; --ink:#22302a; --muted:#6b756f; --line:#e3dccd;
+  --green:#1f4d3a; --green2:#2f6b52; --red:#b3262e; --gold:#c08a1e; --soft:#efe8da;
+  --idea:#8a8f8b; --bought:#c08a1e; --wrapped:#2f6b52; --given:#b3262e;
+  --r:14px; --shadow:0 1px 2px rgba(30,40,35,.06),0 4px 14px rgba(30,40,35,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px 96px}
+header.top{background:var(--green);color:#fff;padding:18px 0 16px;position:relative;overflow:hidden}
+header.top .wrap{padding-bottom:0;display:flex;align-items:center;justify-content:space-between;gap:12px}
+header.top h1{font-family:Georgia,"Times New Roman",serif;font-weight:600;font-size:26px;margin:0;letter-spacing:.2px}
+header.top .sub{opacity:.85;font-size:14px;margin-top:2px}
+.count{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:6px 14px;font-size:14px;white-space:nowrap}
+.count b{font-size:18px}
+nav.tabs{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+nav.tabs .wrap{display:flex;gap:4px;padding-top:8px;padding-bottom:0;overflow-x:auto}
+nav.tabs button{background:none;border:0;padding:10px 14px;border-bottom:3px solid transparent;color:var(--muted);font-weight:600;white-space:nowrap}
+nav.tabs button[aria-selected=true]{color:var(--green);border-bottom-color:var(--red)}
+main.wrap{padding-top:18px}
+section[hidden]{display:none}
+h2{font-family:Georgia,"Times New Roman",serif;font-weight:600;font-size:22px;margin:4px 0 12px;color:var(--green)}
+h3{font-size:16px;margin:0}
+.grid{display:grid;gap:12px}
+.stats{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:14px 16px}
+.stat .k{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.stat .v{font-size:26px;font-weight:700;margin-top:2px}
+.stat.over .v{color:var(--red)}
+.bar{height:10px;background:var(--soft);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--green2);border-radius:99px}
+.bar.over i{background:var(--red)}
+.progress{grid-template-columns:repeat(3,1fr);margin-top:12px}
+.progress .lbl{display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px}
+.progress .lbl b{font-weight:700}
+.row{display:flex;align-items:center;gap:10px}
+.space{justify-content:space-between}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:9px 14px;font-weight:600}
+.btn.primary{background:var(--red);border-color:var(--red);color:#fff}
+.btn.green{background:var(--green);border-color:var(--green);color:#fff}
+.btn.ghost{background:transparent}
+.btn.danger{color:var(--red)}
+.btn:disabled{opacity:.5;cursor:default}
+.icon{border:0;background:none;padding:6px 8px;border-radius:8px;color:var(--muted)}
+.icon:hover{background:var(--soft)}
+table.people{width:100%;border-collapse:collapse;font-size:15px}
+table.people th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700;padding:8px 6px;border-bottom:1px solid var(--line)}
+table.people td{padding:10px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.people tr:last-child td{border-bottom:0}
+table.people td.num,table.people th.num{text-align:right;white-space:nowrap}
+.neg{color:var(--red);font-weight:700}
+.pcards{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.person{cursor:pointer;transition:transform .08s}
+.person:hover{transform:translateY(-1px)}
+.person .name{font-weight:700;font-size:17px}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:99px;background:var(--soft);color:var(--green)}
+.chip{border:0;border-radius:99px;padding:4px 11px;font-size:13px;font-weight:700;color:#fff;min-width:78px}
+.chip.idea{background:var(--idea)} .chip.bought{background:var(--bought)} .chip.wrapped{background:var(--wrapped)} .chip.given{background:var(--given)}
+.gift{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.gift:last-child{border-bottom:0}
+.gift .t{font-weight:600}
+.gift .meta{font-size:13px;color:var(--muted)}
+.gift .price{font-weight:700;white-space:nowrap}
+.empty{text-align:center;color:var(--muted);padding:28px 10px}
+.empty b{display:block;color:var(--ink);font-size:17px;margin-bottom:4px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.filters button{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:6px 14px;font-weight:600;font-size:14px}
+.filters button[aria-pressed=true]{background:var(--green);border-color:var(--green);color:#fff}
+.group{margin-bottom:14px}
+.group h3{font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:0 0 6px}
+.check{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
+.check:last-child{border-bottom:0}
+.check input{width:22px;height:22px;accent-color:var(--green)}
+.check .who{font-size:13px;color:var(--muted)}
+.notice{background:#fff4d6;border:1px solid #ecd48f;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:14px}
+dialog{border:0;border-radius:16px;padding:0;width:min(520px,94vw);box-shadow:0 20px 60px rgba(0,0,0,.25);color:var(--ink);background:var(--card)}
+dialog::backdrop{background:rgba(20,30,25,.45)}
+dialog form{padding:18px 18px 16px}
+dialog h2{margin-top:0}
+label.f{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:10px 0 4px}
+input.f,select.f,textarea.f{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff}
+textarea.f{min-height:70px;resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.actions{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap}
+.actions .r{display:flex;gap:8px;margin-left:auto}
+.detail-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.minis{display:flex;gap:18px;flex-wrap:wrap;margin:10px 0 4px}
+.minis div{font-size:13px;color:var(--muted)} .minis b{display:block;font-size:18px;color:var(--ink)}
+.set-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.set-row:last-child{border-bottom:0}
+.foot{margin-top:26px;text-align:center;font-size:13px;color:var(--muted)}
+.printonly{display:none}
+@media (max-width:700px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .progress{grid-template-columns:1fr}
+  header.top .wrap{flex-wrap:wrap;gap:8px}
+  header.top h1{font-size:22px}
+  .count{padding:4px 12px;font-size:13px}
+  nav.tabs .wrap{gap:0;padding-left:8px;padding-right:8px}
+  nav.tabs button{padding:10px 8px;font-size:14px}
+  .long{display:none}
+  .stat .v{font-size:22px}
+  table.people .hide-s{display:none}
+  .two{grid-template-columns:1fr}
+}
+@media print{
+  body{background:#fff;font-size:12pt}
+  header.top,nav.tabs,.noprint,dialog,.btn,.icon,.filters,.notice{display:none !important}
+  .wrap{max-width:none;padding:0}
+  .card{box-shadow:none;border:1px solid #bbb}
+  section{display:none !important}
+  section.printing{display:block !important}
+  .printonly{display:block}
+  .check input{display:none}
+  .check:before{content:"";width:14px;height:14px;border:1.5px solid #333;border-radius:3px;display:inline-block}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div>
+      <h1>Christmas Gift Tracker</h1>
+      <div class="sub" id="subline">Gifts, budget and shopping list</div>
+    </div>
+    <div class="count" id="countdown"></div>
+  </div>
+</header>
+<nav class="tabs" aria-label="Sections">
+  <div class="wrap" role="tablist">
+    <button role="tab" data-tab="overview" aria-selected="true">Overview</button>
+    <button role="tab" data-tab="people" aria-selected="false">People</button>
+    <button role="tab" data-tab="shopping" aria-selected="false">Shopping<span class="long"> list</span></button>
+    <button role="tab" data-tab="received" aria-selected="false">Thank-yous</button>
+    <button role="tab" data-tab="settings" aria-selected="false">Settings</button>
+  </div>
+</nav>
+
+<main class="wrap">
+  <div class="notice" id="storageWarn" hidden>This browser is not letting the app save. Your changes will be lost when you close the page. Try another browser, or keep a backup from Settings.</div>
+
+  <section id="tab-overview">
+    <div class="grid stats">
+      <div class="card stat"><div class="k">Budget</div><div class="v" id="sBudget">0</div></div>
+      <div class="card stat"><div class="k">Spent</div><div class="v" id="sSpent">0</div></div>
+      <div class="card stat" id="sLeftCard"><div class="k" id="sLeftK">Left</div><div class="v" id="sLeft">0</div></div>
+      <div class="card stat"><div class="k">Ideas not bought</div><div class="v" id="sIdeas">0</div></div>
+    </div>
+    <div class="grid progress">
+      <div class="card"><div class="lbl"><span>Bought</span><b id="pBought">0 of 0</b></div><div class="bar"><i id="bBought" style="width:0"></i></div></div>
+      <div class="card"><div class="lbl"><span>Wrapped</span><b id="pWrapped">0 of 0</b></div><div class="bar"><i id="bWrapped" style="width:0"></i></div></div>
+      <div class="card"><div class="lbl"><span>Given</span><b id="pGiven">0 of 0</b></div><div class="bar"><i id="bGiven" style="width:0"></i></div></div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <div class="row space"><h2 style="margin:0">Everyone on your list</h2><button class="btn primary noprint" data-act="add-person">+ Add person</button></div>
+      <div id="overviewTable"></div>
+    </div>
+  </section>
+
+  <section id="tab-people" hidden>
+    <div id="peopleList">
+      <div class="row space" style="margin-bottom:12px"><h2 style="margin:0">People</h2><button class="btn primary" data-act="add-person">+ Add person</button></div>
+      <div class="grid pcards" id="personCards"></div>
+    </div>
+    <div id="personDetail" hidden></div>
+  </section>
+
+  <section id="tab-shopping" hidden>
+    <div class="row space" style="margin-bottom:6px;flex-wrap:wrap">
+      <h2 style="margin:0" class="noprint">Shopping list</h2>
+      <div class="row noprint"><button class="btn ghost" data-act="copy-list">Copy</button><button class="btn green" data-act="print-list">Print</button></div>
+    </div>
+    <p class="muted small noprint" style="margin-top:0">Tick a gift to move it on: bought, then wrapped, then given.</p>
+    <div class="filters" id="shopFilters">
+      <button data-f="buy" aria-pressed="true">To buy</button>
+      <button data-f="wrap" aria-pressed="false">To wrap</button>
+      <button data-f="give" aria-pressed="false">To give</button>
+    </div>
+    <div class="printonly"><h2 id="printTitle">Shopping list</h2></div>
+    <div class="card" id="shopList"></div>
+  </section>
+
+  <section id="tab-received" hidden>
+    <div class="row space" style="margin-bottom:12px"><h2 style="margin:0">Gifts received and thank-yous</h2><button class="btn primary" data-act="add-received">+ Add</button></div>
+    <div class="card" id="receivedList"></div>
+  </section>
+
+  <section id="tab-settings" hidden>
+    <h2>Settings</h2>
+    <div class="card">
+      <div class="set-row"><div><b>Currency</b><div class="muted small">Shown in front of every amount</div></div>
+        <select class="f" id="setCurrency" style="width:auto">
+          <option value="$">$ Dollar</option><option value="£">£ Pound</option><option value="€">€ Euro</option>
+          <option value="A$">A$ Australian dollar</option><option value="C$">C$ Canadian dollar</option>
+          <option value="NZ$">NZ$ New Zealand dollar</option><option value="₹">₹ Rupee</option>
+        </select></div>
+      <div class="set-row"><div><b>Total budget</b><div class="muted small">Leave empty to add up each person's budget</div></div>
+        <input class="f" id="setBudget" type="number" min="0" step="1" inputmode="decimal" placeholder="Add up people" style="width:160px"></div>
+      <div class="set-row"><div><b>Christmas of</b><div class="muted small">Sets the countdown</div></div>
+        <input class="f" id="setYear" type="number" min="2024" max="2100" style="width:110px"></div>
+    </div>
+    <h2 style="margin-top:22px">Your data</h2>
+    <div class="card">
+      <p class="small" style="margin-top:0">Your list is saved in this browser, on this device only. Nothing is sent anywhere. Download a backup now and then, and to move your list to another device or browser, restore that backup there.</p>
+      <div class="set-row"><div><b>Download a backup</b><div class="muted small">Saves a small .json file</div></div><button class="btn green" data-act="export">Download</button></div>
+      <div class="set-row"><div><b>Restore a backup</b><div class="muted small">Replaces what is here now</div></div><button class="btn" data-act="import">Choose file</button><input type="file" id="importFile" accept=".json,application/json" hidden></div>
+      <div class="set-row"><div><b>Example list</b><div class="muted small">Six people and their gifts, to see how it works</div></div><button class="btn" data-act="example">Load example</button></div>
+      <div class="set-row"><div><b>Start again</b><div class="muted small">Deletes everything in this browser</div></div><button class="btn danger" data-act="clear">Delete all</button></div>
+    </div>
+    <p class="foot">Christmas Gift Tracker 1.0 · Designed by OrderlyHour · For personal use</p>
+  </section>
+</main>
+
+<dialog id="dlgPerson"><form method="dialog" id="formPerson">
+  <h2 id="dlgPersonTitle">Add a person</h2>
+  <label class="f" for="pName">Name</label><input class="f" id="pName" required maxlength="60" autocomplete="off">
+  <div class="two">
+    <div><label class="f" for="pGroup">Group</label>
+      <select class="f" id="pGroup"><option>Family</option><option>Friends</option><option>Kids</option><option>Work</option><option>Neighbors</option><option>Teachers</option><option>Other</option></select></div>
+    <div><label class="f" for="pBudget">Budget</label><input class="f" id="pBudget" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0"></div>
+  </div>
+  <label class="f" for="pNotes">Notes: sizes, likes, wish list</label><textarea class="f" id="pNotes" maxlength="600"></textarea>
+  <div class="actions"><button type="button" class="btn danger" id="pDelete" hidden>Delete person</button>
+    <div class="r"><button type="button" class="btn" data-close>Cancel</button><button class="btn primary" value="save">Save</button></div></div>
+</form></dialog>
+
+<dialog id="dlgGift"><form method="dialog" id="formGift">
+  <h2 id="dlgGiftTitle">Add a gift</h2>
+  <label class="f" for="gTitle">Gift</label><input class="f" id="gTitle" required maxlength="80" autocomplete="off">
+  <div class="two">
+    <div><label class="f" for="gPrice">Price</label><input class="f" id="gPrice" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0"></div>
+    <div><label class="f" for="gStatus">Status</label>
+      <select class="f" id="gStatus"><option value="idea">Idea</option><option value="bought">Bought</option><option value="wrapped">Wrapped</option><option value="given">Given</option></select></div>
+  </div>
+  <div class="two">
+    <div><label class="f" for="gStore">Where to buy</label><input class="f" id="gStore" maxlength="40" placeholder="Online, mall, bookshop..." list="storeList"></div>
+    <div><label class="f" for="gLink">Link (optional)</label><input class="f" id="gLink" type="url" maxlength="400" placeholder="https://"></div>
+  </div>
+  <datalist id="storeList"></datalist>
+  <label class="f" for="gNotes">Notes</label><textarea class="f" id="gNotes" maxlength="400"></textarea>
+  <div class="actions"><button type="button" class="btn danger" id="gDelete" hidden>Delete gift</button>
+    <div class="r"><button type="button" class="btn" data-close>Cancel</button><button class="btn primary" value="save">Save</button></div></div>
+</form></dialog>
+
+<dialog id="dlgReceived"><form method="dialog" id="formReceived">
+  <h2 id="dlgReceivedTitle">Gift received</h2>
+  <label class="f" for="rFrom">From</label><input class="f" id="rFrom" required maxlength="60" autocomplete="off">
+  <label class="f" for="rGift">Gift</label><input class="f" id="rGift" maxlength="80" autocomplete="off">
+  <label class="row" style="margin-top:12px;gap:8px"><input type="checkbox" id="rSent" style="width:20px;height:20px;accent-color:var(--green)"> Thank-you sent</label>
+  <div class="actions"><button type="button" class="btn danger" id="rDelete" hidden>Delete</button>
+    <div class="r"><button type="button" class="btn" data-close>Cancel</button><button class="btn primary" value="save">Save</button></div></div>
+</form></dialog>
+
+<script>
+(function(){
+"use strict";
+var KEY = "orderlyhour-gift-tracker-v1";
+var STATUSES = ["idea","bought","wrapped","given"];
+var LABEL = {idea:"Idea", bought:"Bought", wrapped:"Wrapped", given:"Given"};
+var canSave = true;
+
+function blank(){
+  var now = new Date();
+  var y = now.getFullYear(); if (now.getMonth() === 11 && now.getDate() > 26) y += 1;
+  return {version:1, year:y, currency:"$", totalBudget:null, people:[], gifts:[], received:[]};
+}
+function load(){
+  try {
+    var raw = localStorage.getItem(KEY);
+    if (raw) { var d = JSON.parse(raw); if (valid(d)) return normalise(d); }
+  } catch (e) { canSave = false; }
+  return blank();
+}
+function save(){
+  try { localStorage.setItem(KEY, JSON.stringify(S)); canSave = true; }
+  catch (e) { canSave = false; }
+  document.getElementById("storageWarn").hidden = canSave;
+}
+function valid(d){ return d && typeof d === "object" && Array.isArray(d.people) && Array.isArray(d.gifts); }
+function normalise(d){
+  var b = blank();
+  b.year = +d.year || b.year; b.currency = typeof d.currency === "string" ? d.currency.slice(0,4) : "$";
+  b.totalBudget = (d.totalBudget === null || d.totalBudget === "" || isNaN(+d.totalBudget)) ? null : +d.totalBudget;
+  b.people = d.people.filter(function(p){return p && p.id && p.name;}).map(function(p){
+    return {id:String(p.id), name:String(p.name).slice(0,60), group:String(p.group||"Family").slice(0,20), budget:+p.budget||0, notes:String(p.notes||"").slice(0,600)};
+  });
+  var ids = {}; b.people.forEach(function(p){ ids[p.id] = 1; });
+  b.gifts = d.gifts.filter(function(g){return g && g.id && ids[g.personId];}).map(function(g){
+    return {id:String(g.id), personId:String(g.personId), title:String(g.title||"").slice(0,80), price:+g.price||0,
+      store:String(g.store||"").slice(0,40), link:String(g.link||"").slice(0,400), notes:String(g.notes||"").slice(0,400),
+      status: STATUSES.indexOf(g.status) >= 0 ? g.status : "idea"};
+  });
+  b.received = (Array.isArray(d.received) ? d.received : []).filter(function(r){return r && r.id;}).map(function(r){
+    return {id:String(r.id), from:String(r.from||"").slice(0,60), gift:String(r.gift||"").slice(0,80), sent:!!r.sent};
+  });
+  return b;
+}
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function money(n){
+  var v = Math.round((+n||0)*100)/100;
+  var s = Math.abs(v).toLocaleString(undefined, {minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2});
+  return (v < 0 ? "-" : "") + S.currency + s;
+}
+function safeLink(u){ return /^https?:\/\//i.test(u) ? u : ""; }
+function $(id){ return document.getElementById(id); }
+
+var S = load();
+var view = {tab:"overview", person:null, shop:"buy"};
+
+// ------------------------------------------------------------------ maths
+function giftsOf(pid){ return S.gifts.filter(function(g){ return g.personId === pid; }); }
+function isSpent(g){ return g.status !== "idea"; }
+function sum(list, f){ return list.reduce(function(a,x){ return a + (f ? f(x) : x); }, 0); }
+function personTotals(p){
+  var gs = giftsOf(p.id);
+  var spent = sum(gs.filter(isSpent), function(g){ return g.price; });
+  var ideas = sum(gs.filter(function(g){ return !isSpent(g); }), function(g){ return g.price; });
+  return {gifts:gs, spent:spent, ideas:ideas, left:p.budget - spent};
+}
+function budgetTotal(){ return S.totalBudget !== null ? S.totalBudget : sum(S.people, function(p){ return p.budget; }); }
+
+// ------------------------------------------------------------------ render
+function render(){
+  renderHeader(); renderOverview(); renderPeople(); renderShopping(); renderReceived(); renderSettings();
+  document.getElementById("storageWarn").hidden = canSave;
+}
+function renderHeader(){
+  var today = new Date(); today.setHours(0,0,0,0);
+  var xmas = new Date(S.year, 11, 25);
+  var days = Math.round((xmas - today) / 86400000);
+  $("countdown").innerHTML = days > 1 ? "<b>" + days + "</b> days to Christmas" : days === 1 ? "<b>1</b> day to Christmas" : days === 0 ? "<b>Merry Christmas!</b>" : "Christmas " + S.year;
+  $("subline").textContent = "Christmas " + S.year + " · " + S.people.length + (S.people.length === 1 ? " person" : " people") + " · " + S.gifts.length + (S.gifts.length === 1 ? " gift" : " gifts");
+}
+function renderOverview(){
+  var budget = budgetTotal();
+  var spent = sum(S.gifts.filter(isSpent), function(g){ return g.price; });
+  var ideas = sum(S.gifts.filter(function(g){ return !isSpent(g); }), function(g){ return g.price; });
+  var left = budget - spent;
+  $("sBudget").textContent = money(budget); $("sSpent").textContent = money(spent);
+  $("sLeft").textContent = money(Math.abs(left)); $("sLeftK").textContent = left < 0 ? "Over budget" : "Left";
+  $("sLeftCard").classList.toggle("over", left < 0);
+  $("sIdeas").textContent = money(ideas);
+  var n = S.gifts.length;
+  var b = S.gifts.filter(function(g){ return g.status !== "idea"; }).length;
+  var w = S.gifts.filter(function(g){ return g.status === "wrapped" || g.status === "given"; }).length;
+  var gv = S.gifts.filter(function(g){ return g.status === "given"; }).length;
+  [["Bought",b],["Wrapped",w],["Given",gv]].forEach(function(x){
+    $("p"+x[0]).textContent = x[1] + " of " + n; $("b"+x[0]).style.width = (n ? x[1]/n*100 : 0) + "%";
+  });
+  if (!S.people.length){
+    $("overviewTable").innerHTML = '<div class="empty"><b>Your list is empty</b>Add the people you are buying for, or load the example list from Settings to see how it works.</div>';
+    return;
+  }
+  var h = '<table class="people"><thead><tr><th>Name</th><th class="hide-s">Gifts</th><th class="num">Budget</th><th class="num">Spent</th><th class="num">Left</th><th style="width:22%" class="hide-s"></th></tr></thead><tbody>';
+  S.people.forEach(function(p){
+    var t = personTotals(p);
+    var pct = p.budget ? Math.min(100, t.spent / p.budget * 100) : (t.spent ? 100 : 0);
+    var bought = t.gifts.filter(isSpent).length;
+    h += '<tr data-person="' + esc(p.id) + '" style="cursor:pointer"><td><b>' + esc(p.name) + '</b><div class="small muted">' + esc(p.group) + '</div></td>' +
+      '<td class="hide-s">' + bought + ' of ' + t.gifts.length + ' bought</td>' +
+      '<td class="num">' + money(p.budget) + '</td><td class="num">' + money(t.spent) + '</td>' +
+      '<td class="num' + (t.left < 0 ? ' neg' : '') + '">' + money(t.left) + '</td>' +
+      '<td class="hide-s"><div class="bar' + (t.left < 0 ? ' over' : '') + '"><i style="width:' + pct + '%"></i></div></td></tr>';
+  });
+  $("overviewTable").innerHTML = h + '</tbody></table>';
+}
+function renderPeople(){
+  var cards = $("personCards");
+  if (!S.people.length){
+    cards.innerHTML = '<div class="card empty" style="grid-column:1/-1"><b>No one on your list yet</b>Tap "Add person" to start.</div>';
+  } else {
+    cards.innerHTML = S.people.map(function(p){
+      var t = personTotals(p);
+      var pct = p.budget ? Math.min(100, t.spent / p.budget * 100) : (t.spent ? 100 : 0);
+      return '<div class="card person" data-person="' + esc(p.id) + '"><div class="row space"><span class="name">' + esc(p.name) + '</span><span class="tag">' + esc(p.group) + '</span></div>' +
+        '<div class="row space small muted" style="margin:8px 0 6px"><span>' + t.gifts.length + (t.gifts.length === 1 ? ' gift' : ' gifts') + '</span><span' + (t.left < 0 ? ' class="neg"' : '') + '>' + money(t.spent) + ' of ' + money(p.budget) + '</span></div>' +
+        '<div class="bar' + (t.left < 0 ? ' over' : '') + '"><i style="width:' + pct + '%"></i></div></div>';
+    }).join("");
+  }
+  var p = S.people.find(function(x){ return x.id === view.person; });
+  $("peopleList").hidden = !!p; $("personDetail").hidden = !p;
+  if (!p) return;
+  var t = personTotals(p);
+  var h = '<button class="btn ghost" data-act="back" style="padding-left:0;border:0">&larr; All people</button>' +
+    '<div class="card" style="margin-top:8px"><div class="detail-head"><div><h2 style="margin:0">' + esc(p.name) + '</h2><span class="tag">' + esc(p.group) + '</span></div>' +
+    '<div class="row"><button class="btn" data-act="edit-person" data-id="' + esc(p.id) + '">Edit</button><button class="btn primary" data-act="add-gift" data-id="' + esc(p.id) + '">+ Add gift</button></div></div>' +
+    '<div class="minis"><div>Budget<b>' + money(p.budget) + '</b></div><div>Spent<b>' + money(t.spent) + '</b></div><div>Left<b' + (t.left < 0 ? ' class="neg"' : '') + '>' + money(t.left) + '</b></div><div>Ideas<b>' + money(t.ideas) + '</b></div></div>' +
+    (p.notes ? '<p class="small" style="white-space:pre-wrap;background:var(--soft);padding:10px 12px;border-radius:10px">' + esc(p.notes) + '</p>' : '') + '</div>' +
+    '<div class="card" style="margin-top:12px">';
+  if (!t.gifts.length) h += '<div class="empty"><b>No gifts yet</b>Add ideas now and mark them bought later.</div>';
+  t.gifts.forEach(function(g){
+    var link = safeLink(g.link);
+    h += '<div class="gift"><div><div class="t">' + esc(g.title || "Untitled gift") + '</div><div class="meta">' +
+      [g.store ? esc(g.store) : "", link ? '<a href="' + esc(link) + '" target="_blank" rel="noopener noreferrer">link</a>' : "", g.notes ? esc(g.notes) : ""].filter(Boolean).join(" · ") + '</div></div>' +
+      '<span class="price">' + money(g.price) + '</span>' +
+      '<div class="row" style="gap:4px"><button class="chip ' + g.status + '" data-act="cycle" data-id="' + esc(g.id) + '" title="Tap to move on">' + LABEL[g.status] + '</button>' +
+      '<button class="icon" data-act="edit-gift" data-id="' + esc(g.id) + '" aria-label="Edit gift">&#9998;</button></div></div>';
+  });
+  $("personDetail").innerHTML = h + '</div>';
+}
+function shopItems(){
+  var want = {buy:"idea", wrap:"bought", give:"wrapped"}[view.shop];
+  return S.gifts.filter(function(g){ return g.status === want; });
+}
+function personName(id){ var p = S.people.find(function(x){ return x.id === id; }); return p ? p.name : ""; }
+function renderShopping(){
+  [].forEach.call($("shopFilters").children, function(b){ b.setAttribute("aria-pressed", b.dataset.f === view.shop); });
+  var items = shopItems();
+  $("printTitle").textContent = {buy:"Shopping list", wrap:"Still to wrap", give:"Still to give"}[view.shop] + " · Christmas " + S.year;
+  if (!items.length){
+    $("shopList").innerHTML = '<div class="empty"><b>' + {buy:"Nothing left to buy", wrap:"Nothing waiting to be wrapped", give:"Nothing waiting to be given"}[view.shop] + '</b>' +
+      (S.gifts.length ? "Nice work." : "Add gift ideas to people and they appear here.") + '</div>';
+    return;
+  }
+  var groups = {}, order = [];
+  items.forEach(function(g){
+    var k = view.shop === "buy" ? (g.store || "Anywhere") : personName(g.personId);
+    if (!groups[k]){ groups[k] = []; order.push(k); }
+    groups[k].push(g);
+  });
+  if (view.shop === "buy") order.sort(function(a,b){ return a === "Anywhere" ? 1 : b === "Anywhere" ? -1 : a.localeCompare(b); });
+  var h = "";
+  order.forEach(function(k){
+    var total = sum(groups[k], function(g){ return g.price; });
+    h += '<div class="group"><h3>' + esc(k) + ' · ' + money(total) + '</h3>';
+    groups[k].forEach(function(g){
+      h += '<label class="check"><input type="checkbox" data-act="tick" data-id="' + esc(g.id) + '"><span><span class="t">' + esc(g.title || "Untitled gift") + '</span>' +
+        (view.shop === "buy" ? '<div class="who">for ' + esc(personName(g.personId)) + '</div>' : '') + '</span><span class="price">' + money(g.price) + '</span></label>';
+    });
+    h += '</div>';
+  });
+  h += '<div class="row space" style="border-top:2px solid var(--line);padding-top:10px"><b>' + items.length + (items.length === 1 ? ' gift' : ' gifts') + '</b><b>' + money(sum(items, function(g){ return g.price; })) + '</b></div>';
+  $("shopList").innerHTML = h;
+}
+function renderReceived(){
+  if (!S.received.length){
+    $("receivedList").innerHTML = '<div class="empty"><b>Nothing here yet</b>After Christmas, note who gave you what, and tick each thank-you as you send it.</div>';
+    return;
+  }
+  var done = S.received.filter(function(r){ return r.sent; }).length;
+  var h = '<div class="small muted" style="margin-bottom:6px">' + done + ' of ' + S.received.length + ' thank-yous sent</div>';
+  S.received.forEach(function(r){
+    h += '<div class="check"><input type="checkbox" data-act="sent" data-id="' + esc(r.id) + '"' + (r.sent ? ' checked' : '') + ' aria-label="Thank-you sent">' +
+      '<span><span class="t"' + (r.sent ? ' style="text-decoration:line-through;color:var(--muted)"' : '') + '>' + esc(r.gift || "A gift") + '</span><div class="who">from ' + esc(r.from) + '</div></span>' +
+      '<button class="icon" data-act="edit-received" data-id="' + esc(r.id) + '" aria-label="Edit">&#9998;</button></div>';
+  });
+  $("receivedList").innerHTML = h;
+}
+function renderSettings(){
+  $("setCurrency").value = S.currency;
+  if ($("setCurrency").value !== S.currency){ var o = document.createElement("option"); o.value = o.textContent = S.currency; $("setCurrency").appendChild(o); $("setCurrency").value = S.currency; }
+  $("setBudget").value = S.totalBudget === null ? "" : S.totalBudget;
+  $("setYear").value = S.year;
+  var stores = {}; S.gifts.forEach(function(g){ if (g.store) stores[g.store] = 1; });
+  $("storeList").innerHTML = Object.keys(stores).sort().map(function(s){ return '<option value="' + esc(s) + '">'; }).join("");
+}
+
+// ------------------------------------------------------------------ dialogs
+var editing = null;
+function openDlg(id){ var d = $(id); if (d.showModal) d.showModal(); else d.setAttribute("open",""); }
+function closeDlg(d){ if (d.close) d.close(); else d.removeAttribute("open"); }
+function personForm(p){
+  editing = p ? p.id : null;
+  $("dlgPersonTitle").textContent = p ? "Edit " + p.name : "Add a person";
+  $("pName").value = p ? p.name : ""; $("pGroup").value = p ? p.group : "Family";
+  $("pBudget").value = p && p.budget ? p.budget : ""; $("pNotes").value = p ? p.notes : "";
+  $("pDelete").hidden = !p; openDlg("dlgPerson"); $("pName").focus();
+}
+function giftForm(personId, g){
+  editing = {personId: personId, id: g ? g.id : null};
+  $("dlgGiftTitle").textContent = g ? "Edit gift" : "Add a gift for " + personName(personId);
+  $("gTitle").value = g ? g.title : ""; $("gPrice").value = g && g.price ? g.price : "";
+  $("gStatus").value = g ? g.status : "idea"; $("gStore").value = g ? g.store : "";
+  $("gLink").value = g ? g.link : ""; $("gNotes").value = g ? g.notes : "";
+  $("gDelete").hidden = !g; openDlg("dlgGift"); $("gTitle").focus();
+}
+function receivedForm(r){
+  editing = r ? r.id : null;
+  $("dlgReceivedTitle").textContent = r ? "Edit" : "Gift received";
+  $("rFrom").value = r ? r.from : ""; $("rGift").value = r ? r.gift : ""; $("rSent").checked = r ? r.sent : false;
+  $("rDelete").hidden = !r; openDlg("dlgReceived"); $("rFrom").focus();
+}
+$("formPerson").addEventListener("submit", function(e){
+  var name = $("pName").value.trim(); if (!name){ e.preventDefault(); return; }
+  var data = {name:name, group:$("pGroup").value, budget:Math.max(0, +$("pBudget").value || 0), notes:$("pNotes").value.trim()};
+  if (editing){ Object.assign(S.people.find(function(p){ return p.id === editing; }), data); }
+  else { data.id = uid(); S.people.push(data); }
+  save(); render();
+});
+$("pDelete").addEventListener("click", function(){
+  var p = S.people.find(function(x){ return x.id === editing; });
+  if (!p || !confirm("Delete " + p.name + " and their " + giftsOf(p.id).length + " gifts?")) return;
+  S.gifts = S.gifts.filter(function(g){ return g.personId !== p.id; });
+  S.people = S.people.filter(function(x){ return x.id !== p.id; });
+  view.person = null; closeDlg($("dlgPerson")); save(); render();
+});
+$("formGift").addEventListener("submit", function(e){
+  var title = $("gTitle").value.trim(); if (!title){ e.preventDefault(); return; }
+  var data = {title:title, price:Math.max(0, +$("gPrice").value || 0), status:$("gStatus").value, store:$("gStore").value.trim(), link:$("gLink").value.trim(), notes:$("gNotes").value.trim()};
+  if (editing.id){ Object.assign(S.gifts.find(function(g){ return g.id === editing.id; }), data); }
+  else { data.id = uid(); data.personId = editing.personId; S.gifts.push(data); }
+  save(); render();
+});
+$("gDelete").addEventListener("click", function(){
+  if (!confirm("Delete this gift?")) return;
+  S.gifts = S.gifts.filter(function(g){ return g.id !== editing.id; });
+  closeDlg($("dlgGift")); save(); render();
+});
+$("formReceived").addEventListener("submit", function(e){
+  var from = $("rFrom").value.trim(); if (!from){ e.preventDefault(); return; }
+  var data = {from:from, gift:$("rGift").value.trim(), sent:$("rSent").checked};
+  if (editing){ Object.assign(S.received.find(function(r){ return r.id === editing; }), data); }
+  else { data.id = uid(); S.received.push(data); }
+  save(); render();
+});
+$("rDelete").addEventListener("click", function(){
+  S.received = S.received.filter(function(r){ return r.id !== editing; });
+  closeDlg($("dlgReceived")); save(); render();
+});
+[].forEach.call(document.querySelectorAll("[data-close]"), function(b){ b.addEventListener("click", function(){ closeDlg(b.closest("dialog")); }); });
+
+// ------------------------------------------------------------------ actions
+function setTab(t){
+  view.tab = t;
+  [].forEach.call(document.querySelectorAll("nav.tabs button"), function(b){ b.setAttribute("aria-selected", b.dataset.tab === t); });
+  [].forEach.call(document.querySelectorAll("main > section"), function(s){ s.hidden = s.id !== "tab-" + t; });
+  window.scrollTo(0,0);
+}
+document.querySelector("nav.tabs").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-tab]"); if (!b) return;
+  if (b.dataset.tab === "people") view.person = null;
+  setTab(b.dataset.tab); render();
+});
+$("shopFilters").addEventListener("click", function(e){
+  var b = e.target.closest("button[data-f]"); if (!b) return; view.shop = b.dataset.f; renderShopping();
+});
+document.addEventListener("click", function(e){
+  var row = e.target.closest("[data-person]");
+  if (row && !e.target.closest("button")){ view.person = row.dataset.person; setTab("people"); render(); return; }
+  var a = e.target.closest("[data-act]"); if (!a) return;
+  var act = a.dataset.act, id = a.dataset.id;
+  if (act === "add-person") personForm(null);
+  else if (act === "edit-person") personForm(S.people.find(function(p){ return p.id === id; }));
+  else if (act === "back"){ view.person = null; render(); }
+  else if (act === "add-gift") giftForm(id, null);
+  else if (act === "edit-gift"){ var g = S.gifts.find(function(x){ return x.id === id; }); giftForm(g.personId, g); }
+  else if (act === "cycle"){ var g2 = S.gifts.find(function(x){ return x.id === id; }); g2.status = STATUSES[(STATUSES.indexOf(g2.status) + 1) % 4]; save(); render(); }
+  else if (act === "add-received") receivedForm(null);
+  else if (act === "edit-received") receivedForm(S.received.find(function(r){ return r.id === id; }));
+  else if (act === "print-list"){ var sec = $("tab-shopping"); sec.classList.add("printing"); window.print(); setTimeout(function(){ sec.classList.remove("printing"); }, 500); }
+  else if (act === "copy-list") copyList(a);
+  else if (act === "export") exportData();
+  else if (act === "import") $("importFile").click();
+  else if (act === "example"){ if (!S.people.length || confirm("Replace your list with the example list?")){ S = example(); save(); view.person = null; setTab("overview"); render(); } }
+  else if (act === "clear"){ if (confirm("Delete every person, gift and thank-you in this browser? This cannot be undone. Download a backup first if you might want it.")){ var y = S.year, c = S.currency; S = blank(); S.year = y; S.currency = c; save(); view.person = null; render(); } }
+});
+document.addEventListener("change", function(e){
+  var a = e.target.dataset.act, id = e.target.dataset.id;
+  if (a === "tick"){ var g = S.gifts.find(function(x){ return x.id === id; }); setTimeout(function(){ g.status = STATUSES[Math.min(3, STATUSES.indexOf(g.status) + 1)]; save(); render(); }, 250); }
+  else if (a === "sent"){ S.received.find(function(r){ return r.id === id; }).sent = e.target.checked; save(); render(); }
+});
+$("setCurrency").addEventListener("change", function(){ S.currency = this.value; save(); render(); });
+$("setBudget").addEventListener("change", function(){ S.totalBudget = this.value === "" ? null : Math.max(0, +this.value || 0); save(); render(); });
+$("setYear").addEventListener("change", function(){ var y = Math.round(+this.value); if (y >= 2024 && y <= 2100){ S.year = y; save(); } render(); });
+$("importFile").addEventListener("change", function(){
+  var f = this.files[0]; if (!f) return;
+  var rd = new FileReader();
+  rd.onload = function(){
+    try { var d = JSON.parse(rd.result); if (!valid(d)) throw 0;
+      if (!confirm("Replace what is here now with this backup?")) return;
+      S = normalise(d); save(); view.person = null; setTab("overview"); render(); alert("Backup restored.");
+    } catch (err) { alert("That file is not a Gift Tracker backup."); }
+  };
+  rd.readAsText(f); this.value = "";
+});
+function exportData(){
+  var blob = new Blob([JSON.stringify(S, null, 1)], {type:"application/json"});
+  var a = document.createElement("a"); var d = new Date();
+  a.href = URL.createObjectURL(blob);
+  a.download = "gift-tracker-backup-" + d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0") + ".json";
+  document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+function copyList(btn){
+  var items = shopItems(); if (!items.length) return;
+  var txt = $("printTitle").textContent + "\n" + items.map(function(g){ return "[ ] " + g.title + " (" + personName(g.personId) + ")" + (g.price ? " " + money(g.price) : "") + (g.store && view.shop === "buy" ? " - " + g.store : ""); }).join("\n");
+  var done = function(){ var t = btn.textContent; btn.textContent = "Copied"; setTimeout(function(){ btn.textContent = t; }, 1400); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, function(){ prompt("Copy this list:", txt); });
+  else prompt("Copy this list:", txt);
+}
+function example(){
+  var d = blank(); d.year = blank().year;
+  var P = [["Mom","Family",120,"Size M. Loves gardening and mystery novels."],["Dad","Family",100,"Into coffee and cycling."],
+           ["Emma","Kids",80,"Age 9. Art, horses, anything glittery."],["Leo","Kids",80,"Age 6. Dinosaurs and building sets."],
+           ["Grandma","Family",60,"Cozy things. Large print books."],["Sam (work)","Work",25,"Office gift exchange, limit 25."]];
+  var G = {0:[["Gardening gloves and tool set",38,"Garden center","wrapped"],["Mystery novel box set",32,"Bookshop","bought"],["Scented candle",24,"Mall","idea"]],
+           1:[["Pour-over coffee kit",45,"Online","bought"],["Bike light set",29,"Online","idea"]],
+           2:[["Watercolor paint set",28,"Craft store","wrapped"],["Horse figurine",18,"Toy store","given"],["Glitter journal",12,"Craft store","idea"]],
+           3:[["Dinosaur building kit",35,"Toy store","bought"],["Dino pajamas",22,"Mall","idea"],["Picture book",14,"Bookshop","idea"]],
+           4:[["Fleece throw blanket",30,"Mall","wrapped"],["Large print puzzle book",12,"Bookshop","bought"]],
+           5:[["Desk plant",18,"Garden center","bought"],["Hot cocoa set",9,"Mall","idea"]]};
+  P.forEach(function(p, i){
+    var id = "ex" + i; d.people.push({id:id, name:p[0], group:p[1], budget:p[2], notes:p[3]});
+    G[i].forEach(function(g, j){ d.gifts.push({id:id + "g" + j, personId:id, title:g[0], price:g[1], store:g[2], link:"", notes:"", status:g[3]}); });
+  });
+  d.received = [{id:"r1", from:"Aunt Carol", gift:"Knitted scarf", sent:true},{id:"r2", from:"The Parkers", gift:"Cookie tin", sent:false}];
+  return d;
+}
+
+render();
+// On the hosted copy (https) a small service worker keeps the app working offline
+// after the first visit. Opened as a file, there is nothing to register.
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  navigator.serviceWorker.register("sw.js").catch(function(){});
+}
+})();
+</script>
+</body>
+</html>
